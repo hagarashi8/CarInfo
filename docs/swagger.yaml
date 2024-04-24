@@ -1,0 +1,159 @@
+definitions:
+  cars.Car:
+    properties:
+      id:
+        type: integer
+      mark:
+        type: string
+      model:
+        type: string
+      name:
+        type: string
+      patronymic:
+        type: string
+      regNum:
+        type: string
+      surname:
+        type: string
+      year:
+        type: integer
+    type: object
+  defaultrouter.AddCarHandler.RequestBody:
+    properties:
+      regNums:
+        items:
+          type: string
+        type: array
+    type: object
+  defaultrouter.PutCarHandler.CarPatch:
+    properties:
+      id:
+        type: integer
+      mark:
+        type: string
+      model:
+        type: string
+      name:
+        type: string
+      patronymic:
+        type: string
+      regNum:
+        type: string
+      surname:
+        type: string
+      year:
+        type: integer
+    type: object
+info:
+  contact: {}
+  title: Bestapp
+  version: 0.0.1
+paths:
+  /car:
+    delete:
+      parameters:
+      - description: ID Машины
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/cars.Car'
+        "400":
+          description: Не был указан ID или был указан неправильный
+        "404":
+          description: Машина с указаным ID не была найдена
+        "500":
+          description: Внутренняя ошибка сервера
+      summary: Удаляет машину по ID
+    get:
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Размер страницы
+        in: query
+        name: page_size
+        type: integer
+      - description: ID Машины
+        in: query
+        name: id
+        type: integer
+      - description: Модель Машины
+        in: query
+        name: model
+        type: string
+      - description: Марка Машины
+        in: query
+        name: mark
+        type: string
+      - description: Регистрационный номер
+        in: query
+        name: regnum
+        type: string
+      - description: Имя владельца
+        in: query
+        name: owner_name
+        type: string
+      - description: Фамилия владельца
+        in: query
+        name: owner_surname
+        type: string
+      - description: Отчество владельца
+        in: query
+        name: owner_patronymic
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/cars.Car'
+            type: array
+        "404":
+          description: Машина не найдена
+        "500":
+          description: Внутренняя ошибка сервера
+      summary: Выдаёт машины по фильтрам
+    post:
+      description: Принимает массив автомобильных гос номеров и добавляет соответствующие
+        машины в базу данных сервиса
+      parameters:
+      - description: Номера машин
+        in: body
+        name: regnum
+        required: true
+        schema:
+          $ref: '#/definitions/defaultrouter.AddCarHandler.RequestBody'
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/cars.Car'
+            type: array
+        "400":
+          description: Номер машины не был принят сторонним API/Тело запроса не соответствовало
+            структуре
+        "500":
+          description: Внутренняя ощибка сервера
+        "502":
+          description: Внутренняя ошибка на стороннем API
+      summary: Добавляет машины в базу данных
+    put:
+      parameters:
+      - description: Изменения машин. ID обязателен.
+        in: body
+        name: patch
+        required: true
+        schema:
+          $ref: '#/definitions/defaultrouter.PutCarHandler.CarPatch'
+      responses:
+        "200":
+          description: OK
+      summary: Изменяет существующую машину
+swagger: "2.0"

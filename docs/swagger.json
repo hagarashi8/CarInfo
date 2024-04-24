@@ -1,0 +1,242 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Bestapp",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/car": {
+            "get": {
+                "summary": "Выдаёт машины по фильтрам",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Размер страницы",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID Машины",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Модель Машины",
+                        "name": "model",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Марка Машины",
+                        "name": "mark",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Регистрационный номер",
+                        "name": "regnum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Имя владельца",
+                        "name": "owner_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фамилия владельца",
+                        "name": "owner_surname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Отчество владельца",
+                        "name": "owner_patronymic",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/cars.Car"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Машина не найдена"
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Изменяет существующую машину",
+                "parameters": [
+                    {
+                        "description": "Изменения машин. ID обязателен.",
+                        "name": "patch",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/defaultrouter.PutCarHandler.CarPatch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "description": "Принимает массив автомобильных гос номеров и добавляет соответствующие машины в базу данных сервиса",
+                "summary": "Добавляет машины в базу данных",
+                "parameters": [
+                    {
+                        "description": "Номера машин",
+                        "name": "regnum",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/defaultrouter.AddCarHandler.RequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/cars.Car"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Номер машины не был принят сторонним API/Тело запроса не соответствовало структуре"
+                    },
+                    "500": {
+                        "description": "Внутренняя ощибка сервера"
+                    },
+                    "502": {
+                        "description": "Внутренняя ошибка на стороннем API"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Удаляет машину по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID Машины",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/cars.Car"
+                        }
+                    },
+                    "400": {
+                        "description": "Не был указан ID или был указан неправильный"
+                    },
+                    "404": {
+                        "description": "Машина с указаным ID не была найдена"
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "cars.Car": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "mark": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "regNum": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "defaultrouter.AddCarHandler.RequestBody": {
+            "type": "object",
+            "properties": {
+                "regNums": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "defaultrouter.PutCarHandler.CarPatch": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "mark": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "regNum": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
