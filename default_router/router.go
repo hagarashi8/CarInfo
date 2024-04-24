@@ -24,7 +24,15 @@ func LogMiddleware(log *logrus.Logger) (func(http.Handler) http.Handler) {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			lrw := NewLoggingResponseWriter(w)
 			h.ServeHTTP(w, r)
-			log.Infof("%s %s %d\n", r.Method, r.URL.Path, lrw.statusCode)
+			code := lrw.statusCode
+			level := logrus.InfoLevel
+			switch code / 100 {
+			case 4:
+			level = logrus.WarnLevel
+			case 5:
+			level = logrus.ErrorLevel
+			}
+			log.Logf(level, "%s %s %d\n", r.Method, r.URL.Path, code)
 		})
 	}
 }

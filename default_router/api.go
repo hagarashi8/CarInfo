@@ -74,20 +74,16 @@ func GetCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (http
 			log.WithContext(r.Context())
 			log.WithError(tx.Error)
 			log.Debugln("Ошибка получения от базы данных")
-			log.Infoln("GET /car 404")
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		log.Traceln("Найдены машины")
 		resjs, err := json.Marshal(result)
 		if err != nil {
-			log.WithError(err)
-			log.Error("Не удалось сериализовать объект")
-			log.Infoln("GET /car 500")
+			log.WithError(err).Error("Не удалось сериализовать объект")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Infoln("GET /car 200")
 		w.Write(resjs)
 	}
 }
@@ -156,7 +152,7 @@ func AddCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (http
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Traceln("Json parsed, result: ", body)
+		log.Traceln("JSON спарсен, результат: ", body)
 		res := make([]cars.Car, 0) 
 		for _, regNum := range body.RegNums {
 			car, resp, err := client.DefaultApi.InfoGet(r.Context(), regNum)
@@ -217,7 +213,6 @@ func DeleteCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (h
 		if tx.Error != nil {
 			w.WriteHeader(http.StatusNotFound)
 			log.WithError(tx.Error)
-			log.Infoln("DELETE /car 404")
 			return
 		}
 		log.Traceln("Успешно найдена машина")
@@ -225,12 +220,10 @@ func DeleteCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (h
 		if tx.Error != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.WithError(tx.Error)
-			log.Infoln("DELETE /car 500")
 			return
 		}
 		log.Traceln("Успешно удалена машина")
 		carbytes, err := json.Marshal(&car)
-		log.Infoln("DELETE /car 200")
 		w.WriteHeader(http.StatusOK)
 		w.Write(carbytes)
 	}
@@ -262,7 +255,6 @@ func PutCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (http
 			w.Write([]byte("500 Internal Server Error"))
 			log.WithError(err)
 			log.Errorln("Ошибка при чтении тела запроса")
-			log.Infoln("PUT /car 500")
 			return
 		}
 		log.Traceln("Тело запроса прочитано")
@@ -273,7 +265,6 @@ func PutCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (http
 			log.WithError(err)
 			log.Debugln("Ошибка при парсинге тела запроса")
 			log.Debugln(req)
-			log.Infoln("PUT /car 400")
 			return
 		}
 		log.Traceln("Парсинг тела удался")
@@ -292,12 +283,10 @@ func PutCarHandler(client *api.APIClient, db *gorm.DB, log *logrus.Logger) (http
 			db.Model(&dbcar).Updates(&car)
 		}
 		if len(notFounds) != len(patches) {
-			log.Infoln("PUT /car 200")
 			w.WriteHeader(http.StatusOK)
 			b, _ := json.Marshal(&notFounds)
 			w.Write(b)
 		} else {
-			log.Infoln("PUT /car 404")
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404 Not found"))
 		}

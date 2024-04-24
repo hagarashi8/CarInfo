@@ -26,12 +26,13 @@ type EnvVars struct {
 	LogLevel logrus.Level
 }
 
-func ReadEnvVars() (vars *EnvVars, err error) {
+func ReadEnvVars(log *logrus.Logger) (vars *EnvVars, err error) {
 	vars = new(EnvVars)
 
 	level := os.Getenv("LOG_LEVEL")
 	vars.LogLevel, err = logrus.ParseLevel(level)
 	if err != nil {
+		log.WithError(err).Warnf("Неверный уровень логгирования: %s\n", level)
 		vars.LogLevel = logrus.InfoLevel
 	}
 	
@@ -116,18 +117,18 @@ func InitDBConnection(env *EnvVars) (db *gorm.DB, err error){
 func main() {
 	// Настройка логгинга
 	log := logrus.New()
-	log.SetLevel(logrus.TraceLevel)
 	log.SetOutput(os.Stderr)
 	// Загрузка переменных окружения
 	err := godotenv.Load()
 	if err != nil {
 		log.WithError(err).Warnln(".env файл не загружен. Используются только переменные окружения.")
 	}
-	env, err := ReadEnvVars()
+	env, err := ReadEnvVars(log)
 	if err != nil {
 		log.WithError(err).Fatalln("Переменные среды не загружены")
 	}
 	log.Debugln(*env)
+	log.SetLevel(env.LogLevel)
 	log.Traceln("Переменные окружения загружены")
 	// Создание API клиента
 	client := SetupAPIClient(env)
