@@ -23,7 +23,7 @@ func LogMiddleware(log *logrus.Logger) (func(http.Handler) http.Handler) {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			lrw := NewLoggingResponseWriter(w)
-			h.ServeHTTP(w, r)
+			h.ServeHTTP(lrw, r)
 			code := lrw.statusCode
 			level := logrus.InfoLevel
 			switch code / 100 {
